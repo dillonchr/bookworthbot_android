@@ -3,6 +3,7 @@ package com.dillonchristensen.bookworth
 import android.os.Bundle
 import android.support.design.widget.Snackbar
 import android.support.v7.app.AppCompatActivity
+import android.view.KeyEvent
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -11,6 +12,9 @@ import kotlinx.android.synthetic.main.activity_search.*
 import kotlinx.android.synthetic.main.content_search.*
 import java.net.URL
 import java.net.URLEncoder
+import android.app.Activity
+import android.view.inputmethod.InputMethodManager
+
 
 class SearchActivity : AppCompatActivity() {
 
@@ -34,6 +38,13 @@ class SearchActivity : AppCompatActivity() {
                 this.search()
             }
         }
+        this.publisherInput.setOnKeyListener(View.OnKeyListener { v, keyCode, event ->
+            if (keyCode == KeyEvent.KEYCODE_ENTER) {
+                search()
+                return@OnKeyListener true
+            }
+            false
+        })
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -68,11 +79,17 @@ class SearchActivity : AppCompatActivity() {
         val author = URLEncoder.encode(this.authorInput.text.toString(), "utf-8")
         val publisher = URLEncoder.encode(this.publisherInput.text.toString(), "utf-8")
         this.progressBar.visibility = View.VISIBLE
+
+        val inputMethodManager = this.getSystemService(
+                Activity.INPUT_METHOD_SERVICE) as InputMethodManager
+        inputMethodManager.hideSoftInputFromWindow(
+                this.getCurrentFocus().getWindowToken(), 0)
+
         Thread({
             val response = URL("http://bot.bookworth.net/?title=$title&author=$author&publisher=$publisher").readText();
             val results = response.substring(1, response.length - 1).split(",")
             val shouldBuy = results[0].toInt()
-            val themeColor:Int
+            val themeColor: Int
             when (shouldBuy) {
                 1 ->
                     themeColor = 0x16A085
