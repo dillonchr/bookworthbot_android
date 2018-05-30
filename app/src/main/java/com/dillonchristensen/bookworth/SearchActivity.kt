@@ -1,19 +1,17 @@
 package com.dillonchristensen.bookworth
 
+import android.app.Activity
 import android.os.Bundle
 import android.support.design.widget.Snackbar
 import android.support.v7.app.AppCompatActivity
 import android.view.KeyEvent
 import android.view.Menu
-import android.view.MenuItem
 import android.view.View
-
+import android.view.inputmethod.InputMethodManager
 import kotlinx.android.synthetic.main.activity_search.*
 import kotlinx.android.synthetic.main.content_search.*
 import java.net.URL
 import java.net.URLEncoder
-import android.app.Activity
-import android.view.inputmethod.InputMethodManager
 
 
 class SearchActivity : AppCompatActivity() {
@@ -22,11 +20,6 @@ class SearchActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_search)
         setSupportActionBar(toolbar)
-
-        fab.setOnClickListener { view ->
-            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                    .setAction("Action", null).show()
-        }
 
         this.resetButton.setOnClickListener { _ ->
             this.clearInputs()
@@ -53,22 +46,12 @@ class SearchActivity : AppCompatActivity() {
         return true
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        return when (item.itemId) {
-            R.id.action_settings -> true
-            else -> super.onOptionsItemSelected(item)
-        }
-    }
-
     fun clearInputs() {
         this.titleInput.setText("")
         this.authorInput.setText("")
         this.publisherInput.setText("")
-        this.avgPrice.text = ""
-        this.conf.text = ""
+        this.avgPrice.text = this.resources.getString(R.string.avg_price)
+        this.conf.text = this.resources.getString(R.string.confidence)
         this.results.text = ""
         this.titleInput.requestFocus()
     }
@@ -78,6 +61,7 @@ class SearchActivity : AppCompatActivity() {
         val title = URLEncoder.encode(this.titleInput.text.toString(), "utf-8")
         val author = URLEncoder.encode(this.authorInput.text.toString(), "utf-8")
         val publisher = URLEncoder.encode(this.publisherInput.text.toString(), "utf-8")
+
         this.progressBar.visibility = View.VISIBLE
 
         val inputMethodManager = this.getSystemService(
@@ -86,7 +70,7 @@ class SearchActivity : AppCompatActivity() {
                 this.getCurrentFocus().getWindowToken(), 0)
 
         Thread({
-            val response = URL("http://bot.bookworth.net/?title=$title&author=$author&publisher=$publisher").readText();
+            val response = URL("http://bot.bookworth.net/?title=$title&author=$author&publisher=$publisher").readText()
             val results = response.substring(1, response.length - 1).split(",")
             val shouldBuy = results[0].toInt()
             val themeColor: Int
